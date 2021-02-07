@@ -1,0 +1,35 @@
+{% extends 'blog/basic.html' %}
+{% block title %}Search Results{% endblock %}
+{% block body %}
+
+<div class="container my-4">
+    <h2>Search Results</h2>
+    {% if query == '' %}
+    <h4>Please dont leave search Blank</h4>
+    {% else %}
+    
+    {% if posts|length == 0 %}
+    <h3>No search Results found for <b>{{query}}</b></h3>
+    <h4>Search Help:</h4>
+    <ul>
+        <li>Check your search for typos</li>
+        <li>Use more generic items</li>
+        <li>The Blog your are searching may be removed from our website or not yet been uploaded</li>
+        <li>Need more search help. <a href="/contact">Contact Us</a></li>
+    </ul>
+    {% endif %}
+    {% for post in posts %}
+    <div class="row my-3 no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+            <strong class="d-inline-block mb-2 text-primary">Article By {{post.post_author}}</strong>
+            <h3 class="mb-0">{{post.post_title}}</h3>
+            <div class="mb-1 text-muted">{{post.post_ts}}</div>
+            <p class="card-text mb-auto">{{post.post_desc|truncatechars:500}}</p>
+            <a href="blog/{{post.post_slug}}" class="stretched-link">Continue reading</a>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+
+{% endblock %}

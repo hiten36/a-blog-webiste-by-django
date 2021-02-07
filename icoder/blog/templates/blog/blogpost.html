@@ -1,0 +1,78 @@
+{% extends 'blog/basic.html' %}
+{% block title %}Blog|BlogPost{% endblock %}
+{% block body %}
+{% load humanize %}
+
+<div class="container">
+    {% for post in posts %}
+    <div class="blog-post">
+        <h2 class="blog-post-title">{{post.post_title}}</h2>
+        <p class="blog-post-meta mb-0">{{post.post_ts}} by <a href="#">{{post.post_author}}</a></p>
+        <span>{{post.post_views}} Views</span>
+        <p class="my-3">{{post.post_desc|safe}}</p>
+    </div>
+    {% endfor %}
+    <h2>Post a comment</h2>
+    {% if user.is_authenticated %}
+    <form action="postcomm" method="POST">{% csrf_token %}
+        <div class="form-group">
+            <input type="hidden" name="post_sno" value="{{posts.0.post_sno}}">
+            <input type="hidden" name="slug" value="{{slug}}">
+            <input type="hidden" name="parent_sno" value="">
+            <textarea class="form-control mt-0" name="comm" id="exampleFormControlTextarea1" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn mb-3 btn-primary">Post</button>
+    </form>
+    {% else %}
+    <h3>You must be sign in to post a comment.</h3>
+    {% endif %}
+    <h2>Comments ({{comms12|length}})</h2>
+    {% load static %}
+    {% for comm in comms %}
+    {% if comm.comm_parent == None %}
+    <div class="media my-2">
+        <img src="/static/blog/user.png" width="33px" height="40px" class="mr-3" alt="...">
+        <div class=" mt-0 media-body">
+            <div class="row mx-0 my-0">
+                <h5 class="mr-3 my-0"><b>{{comm.comm_user}}</b></h5>
+                <p style="padding-top: 2px;" class="my-0">{{comm.comm_ts|naturaltime}}</p>
+            </div>
+            <p class="my-0" style="width: 36rem;">{{comm.comm_comment}}</p>
+            <a class="mt-1 " data-toggle="collapse" href="#reply{{comm.comm_sno}}" aria-expanded="false" aria-controls="reply{{comm.comm_sno}}">Reply
+            </a>
+            <div class="collapse" id="reply{{comm.comm_sno}}">
+                {% if user.is_authenticated %}
+                <form action="postcomm" method="POST">{% csrf_token %}
+                    <div class="form-group">
+                        <input type="hidden" name="post_sno" value="{{posts.0.post_sno}}">
+                        <input type="hidden" name="slug" value="{{slug}}">
+                        <input type="hidden" name="parent_sno" value="{{comm.comm_sno}}">
+                        <textarea class="form-control my-0" name="comm1" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn  btn-primary">Post</button>
+                </form>
+                {% else %}
+                <h3>You must be sign in to post a Reply.</h3>
+                {% endif %}
+            </div>
+            {% for reply in replies %}
+            {% if reply.comm_parent|stringformat:"s" == comm.comm_comment|stringformat:"s" %}
+            <div style="font-size: 15px;" class="media my-3">
+                <img src="/static/blog/user.png" width="33px" height="40px" class="mr-3" alt="...">
+                <div class="media-body">
+                    <div class="row mx-0 my-0">
+                        <b style="font-size: 18px;" class="mr-3 my-0">{{reply.comm_user}}</b>
+                        <p style="padding-top: 2px;" class="my-0">{{reply.comm_ts|naturaltime}}</p>
+                    </div>
+                  <p class="mb-0">{{reply.comm_comment}}</p>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+
+{% endblock %}
